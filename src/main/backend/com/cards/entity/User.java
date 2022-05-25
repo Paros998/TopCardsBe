@@ -2,6 +2,8 @@ package com.cards.entity;
 
 import com.cards.dto.UserCredentials;
 import com.cards.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -22,20 +25,47 @@ import java.util.UUID;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(
-            strategy = GenerationType.IDENTITY
+            strategy = GenerationType.AUTO
     )
     @Column(
             nullable = false,
             updatable = false
     )
     private UUID userId;
+
     private String username;
+
     private String password;
+
     private String email;
+
     @Enumerated(EnumType.STRING)
     private Roles role;
+
     private Boolean locked;
+
     private Boolean enabled;
+
+    @ManyToOne
+    @JoinColumn(name = "file_id")
+    @JsonBackReference
+    private File avatar;
+
+    @OneToOne
+    @JoinColumn(name = "user_settings_Id")
+    private UserSettings userSettings;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Notification> notifications;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<History> userHistory;
 
     public User(UserCredentials userCredentials,
                 Boolean locked,
