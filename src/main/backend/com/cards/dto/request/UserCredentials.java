@@ -1,4 +1,4 @@
-package com.cards.dto;
+package com.cards.dto.request;
 
 import com.cards.enums.Roles;
 import lombok.AllArgsConstructor;

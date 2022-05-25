@@ -1,27 +1,35 @@
 package com.cards.serviceImplementation;
 
-import com.cards.dto.UserCredentials;
+import com.cards.dto.request.UserCredentials;
+import com.cards.dto.request.UserUpdateDTO;
+import com.cards.entity.File;
 import com.cards.entity.User;
 import com.cards.repository.UserRepository;
+import com.cards.serviceInterface.IFileService;
 import com.cards.serviceInterface.IUserService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserService implements IUserService {
     private final static String USER_NOT_FOUND = "User with username %s not found";
-
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
+    private final IFileService fileService;
+
+    private final static UUID BasicUserPhoto = UUID.fromString("ffffffff-ffff-eeee-ffff-ffffffffffff");
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -32,6 +40,7 @@ public class UserService implements IUserService {
 
     }
 
+
     public User getUser(UUID userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with given userId %s doesn't exist!", userId))
@@ -40,6 +49,15 @@ public class UserService implements IUserService {
 
     public User getUser(String username) {
         return userRepository.getByUsername(username);
+    }
+
+    public String getUserAvatar(UUID userId) {
+        File avatar = getUser(userId).getAvatar();
+
+        if(avatar == null)
+            return fileService.getFileUrl(BasicUserPhoto);
+
+        return fileService.getFileUrl(avatar.getFileId());
     }
 
     public User getUserByEmail(String email) {
@@ -73,48 +91,67 @@ public class UserService implements IUserService {
         return user;
     }
 
+    public void uploadUserAvatar(UUID userId, MultipartFile file) {
+
+        User user = getUser(userId);
+
+        UUID avatarId = fileService.uploadFile(file);
+
+        user.setAvatar(fileService.getFileById(avatarId));
+
+        userRepository.save(user);
+
+    }
+
     public void updateUser(User user) {
         userRepository.save(user);
     }
 
-    public void updateUser(UUID userId, UserCredentials userCredentials) {
+    public void updateUser(UUID userId, UserUpdateDTO userUpdateDTO) {
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, userCredentials.getUsername()))
-        );
+        User user = getUser(userId);
 
         //TODO fix update
-        if (!user.getEmail().equals(userCredentials.getEmail()))
-            if (userRepository.existsByEmail(userCredentials.getEmail()))
-                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("This email %s is already taken!", userCredentials.getEmail()));
+        if (!user.getEmail().equals(userUpdateDTO.getEmail()))
+            if (userRepository.existsByEmail(userUpdateDTO.getEmail()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("This email %s is already taken!", userUpdateDTO.getEmail()));
 
+        if (!user.getUsername().equals(userUpdateDTO.getUsername()))
+            if (userRepository.existsByUsername(userUpdateDTO.getUsername()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("This username %s is already taken!", userUpdateDTO.getUsername()));
 
-        if (!user.getUsername().equals(userCredentials.getUsername()))
-            if (userRepository.existsByUsername(userCredentials.getUsername()))
-                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("This username %s is already taken!", userCredentials.getUsername()));
+        if (!userUpdateDTO.getUsername().isEmpty())
+            user.setUsername(userUpdateDTO.getUsername());
 
+        if (!userUpdateDTO.getPassword().isEmpty())
+            user.setPassword(bCryptPasswordEncoder.encode(userUpdateDTO.getPassword()));
 
-        if (!userCredentials.getUsername().isEmpty())
-            user.setUsername(userCredentials.getUsername());
+        if (!userUpdateDTO.getEmail().isEmpty())
+            user.setEmail(userUpdateDTO.getEmail());
 
-        if (!userCredentials.getPassword().isEmpty()) {
+        userRepository.save(user);
+    }
 
-            userCredentials.setPassword(bCryptPasswordEncoder.encode(userCredentials.getPassword()));
+    public void updateUserAvatar(UUID userId, MultipartFile file) {
 
-            user.setPassword(userCredentials.getPassword());
-        }
+        User user = getUser(userId);
 
-        if (!userCredentials.getEmail().isEmpty())
-            user.setEmail(userCredentials.getEmail());
+        UUID newAvatarId = fileService.uploadFile(file);
+
+        File oldAvatar = user.getAvatar();
+
+        user.setAvatar(null);
+
+        fileService.deleteFile(oldAvatar.getFileId());
+
+        user.setAvatar(fileService.getFileById(newAvatarId));
 
         userRepository.save(user);
     }
 
     public void changeStateOfUser(UUID userId) {
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with given id %s doesn't exist in database!", userId))
-        );
+        User user = getUser(userId);
 
         user.setLocked(!user.getLocked());
 
@@ -125,10 +162,23 @@ public class UserService implements IUserService {
 
     public void deleteUserById(UUID userId) {
 
-        userRepository.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with given id %s doesn't exist in database!", userId))
-        );
+        getUser(userId);
 
         userRepository.deleteById(userId);
     }
+
+    public void deleteUserAvatar(UUID userId) {
+
+        User user = getUser(userId);
+
+        File avatar = user.getAvatar();
+
+        user.setAvatar(null);
+
+        userRepository.save(user);
+
+        fileService.deleteFile(avatar.getFileId());
+
+    }
+
 }
