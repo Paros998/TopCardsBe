@@ -1,6 +1,6 @@
 package com.cards.entity;
 
-import com.cards.dto.UserCredentials;
+import com.cards.dto.request.UserCredentials;
 import com.cards.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -66,6 +66,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<History> userHistory;
+
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = UUID.class)
+    private List<UUID> followedCards;
 
     public User(UserCredentials userCredentials,
                 Boolean locked,

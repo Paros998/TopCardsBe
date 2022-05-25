@@ -31,7 +31,7 @@ public class Store {
 
     private String name;
 
-    @ElementCollection(targetClass=String.class)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
     private List<String> addressList;
 
     private String phone;

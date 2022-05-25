@@ -33,7 +33,7 @@ public class GraphicCard {
 
     private String title;
 
-    @ElementCollection(targetClass=String.class)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
     private List<String> typeOfOutputs;
 
     private String producentSite;
@@ -42,7 +42,7 @@ public class GraphicCard {
 
     private Boolean rtxSupport;
 
-    @ElementCollection(targetClass=String.class)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
     private List<String> supportedLibraries;
 
     @Enumerated(EnumType.STRING)
