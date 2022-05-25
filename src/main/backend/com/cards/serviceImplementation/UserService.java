@@ -1,11 +1,9 @@
-package com.cards.service.interfaceImplementation;
+package com.cards.serviceImplementation;
 
 import com.cards.dto.UserCredentials;
-import com.cards.email.EmailService;
-import com.cards.email.EmailTemplates;
 import com.cards.entity.User;
 import com.cards.repository.UserRepository;
-import com.cards.service.interfaceService.IUserService;
+import com.cards.serviceInterface.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;

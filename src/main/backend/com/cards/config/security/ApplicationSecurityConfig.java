@@ -1,10 +1,12 @@
 package com.cards.config.security;
 
-import com.cards.service.interfaceImplementation.UserService;
-import com.cards.Auth.FormLogin.FormLoginUsernameAndPasswordAuthenticationFilter;
-import com.cards.Auth.JWT.JwtTokenVerifier;
+
+import com.cards.auth.form.FormLoginUsernameAndPasswordAuthenticationFilter;
+import com.cards.auth.jwt.JwtTokenFilter;
+import com.cards.serviceInterface.IUserService;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -19,14 +21,24 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableEncryptableProperties
-@AllArgsConstructor
+
 @EnableWebSecurity
 @EnableWebMvc
 @EnableScheduling
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserService userService;
+    private final IUserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final String secret;
+
+    @Autowired
+    public ApplicationSecurityConfig(IUserService userService,
+                                     BCryptPasswordEncoder bCryptPasswordEncoder,
+                                     @Value("${jwt.secret}") String secret) {
+        this.userService = userService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.secret = secret;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -39,8 +51,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new FormLoginUsernameAndPasswordAuthenticationFilter(authenticationManager(), userService))
-                .addFilterAfter(new JwtTokenVerifier(), FormLoginUsernameAndPasswordAuthenticationFilter.class)
+                .addFilter(new FormLoginUsernameAndPasswordAuthenticationFilter(authenticationManager(), userService, secret))
+                .addFilterAfter(new JwtTokenFilter(secret), FormLoginUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/index", "/css/*", "/js/*", "/swagger-ui.html").permitAll()
 

@@ -1,6 +1,6 @@
 package com.cards.auth.form;
 
-import com.cards.service.interfaceService.IUserService;
+import com.cards.serviceInterface.IUserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
@@ -27,9 +27,11 @@ import static com.cards.enums.JwtExpire.REFRESH_TOKEN;
 @AllArgsConstructor
 @Getter
 public class FormLoginUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
     private final AuthenticationManager authenticationManager;
     private final IUserService userService;
     private final boolean postOnly = true;
+    private final String secretKey ;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -57,7 +59,6 @@ public class FormLoginUsernameAndPasswordAuthenticationFilter extends UsernamePa
                                             Authentication authResult) throws IOException, ServletException {
         try {
 
-            String key = "someStringHashToHaveReallyGoodSecurityOverHereSoNoOneWithAmateurSkillsWouldn'tHackThis";
             String username = this.obtainUsername(request);
 
             UUID userId = userService.getUser(username).getUserId();
@@ -68,14 +69,14 @@ public class FormLoginUsernameAndPasswordAuthenticationFilter extends UsernamePa
                     .claim("userId", userId)
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN.getAmount()))
-                    .signWith(Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8)))
+                    .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                     .compact();
 
             String refreshToken = Jwts.builder()
                     .setSubject(authResult.getName())
                     .claim("userId", userId)
                     .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN.getAmount()))
-                    .signWith(Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8)))
+                    .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                     .compact();
 
 

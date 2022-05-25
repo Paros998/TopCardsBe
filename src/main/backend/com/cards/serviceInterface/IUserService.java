@@ -1,4 +1,4 @@
-package com.cards.service.interfaceService;
+package com.cards.serviceInterface;
 
 import com.cards.dto.UserCredentials;
 import com.cards.entity.User;
