@@ -46,5 +46,12 @@ public class UserSettings {
     @JsonIgnore
     private User user;
 
-
+    public UserSettings(User user) {
+        this.user = user;
+        this.isNewCardAdded = false;
+        this.hasFollowedCardBecomeAvailableLocally = false;
+        this.hasFollowedCardBecomeAvailableOnline = false;
+        this.hasFollowedCardNewReview = false;
+        this.hasFollowedCardLowerOnlinePrice = false;
+    }
 }

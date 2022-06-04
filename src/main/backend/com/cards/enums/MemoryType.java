@@ -1,6 +1,6 @@
 package com.cards.enums;
 
-public enum Memory {
+public enum MemoryType {
     DDR3,
     GDDR5,
     GDDR5X,

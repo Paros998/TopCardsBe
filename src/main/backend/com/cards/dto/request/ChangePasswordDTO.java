@@ -1,15 +1,13 @@
 package com.cards.dto.request;
 
-
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-public class UserUpdateDTO {
-    private String username;
-    private String email;
+public class ChangePasswordDTO {
+    private String oldPassword;
+    private String newPassword;
 }
-

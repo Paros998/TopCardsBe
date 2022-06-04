@@ -14,4 +14,9 @@ public class SearchCriteria {
     private String key;
     private Object value;
     private SearchOperation operation;
+
+    public SearchCriteria(String key, SearchOperation operation) {
+        this.key = key;
+        this.operation = operation;
+    }
 }

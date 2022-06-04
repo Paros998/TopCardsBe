@@ -20,4 +20,13 @@ public enum Connector {
         return String.format("PCI Express %s x16", ver);
     }
 
+    public static Connector getConnectorByName(String name){
+        for (Connector connector: values()) {
+            if(connector.getType().equals(name))
+                return connector;
+        }
+
+        return null;
+    }
+
 }

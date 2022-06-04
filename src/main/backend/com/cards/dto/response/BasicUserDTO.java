@@ -15,13 +15,17 @@ public class BasicUserDTO implements Serializable {
     private final String username;
     private final String email;
     private final Roles role;
+    private final Boolean isBlocked;
+    private final String avatarFile;
 
-    public static BasicUserDTO convertFromEntity(User user) {
+    public static BasicUserDTO convertFromEntity(User user, String avatarFile) {
         return new BasicUserDTO(
                 user.getUserId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                user.getLocked(),
+                avatarFile
         );
     }
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -30,11 +31,28 @@ public class History {
     @Enumerated(EnumType.STRING)
     private Action action;
 
-    private String content;
+    private UUID card;
+
+    private String link;
+
+    private LocalDateTime dateTime;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
     private User user;
 
+    public History(Action action, UUID card, LocalDateTime dateTime, User user) {
+        this.action = action;
+        this.card = card;
+        this.dateTime = dateTime;
+        this.user = user;
+    }
+
+    public History(Action action, String link, LocalDateTime dateTime, User user) {
+        this.action = action;
+        this.link = link;
+        this.dateTime = dateTime;
+        this.user = user;
+    }
 }

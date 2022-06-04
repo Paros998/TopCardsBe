@@ -45,5 +45,17 @@ public class Review {
     @JsonBackReference
     private GraphicCard card;
 
-
+    public Review(String opinion,
+                  Boolean isCensored,
+                  Integer score,
+                  LocalDateTime reviewDate,
+                  User user,
+                  GraphicCard card) {
+        this.opinion = opinion;
+        this.isCensored = isCensored;
+        this.score = score;
+        this.reviewDate = reviewDate;
+        this.user = user;
+        this.card = card;
+    }
 }

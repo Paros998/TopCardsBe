@@ -57,7 +57,7 @@ public class Specifications<T> implements Specification<T>, Cloneable {
         Predicate or = builder.or(OrPredicates.toArray(new Predicate[0]));
 
         if (OrPredicates.isEmpty() && AndPredicates.isEmpty())
-            throw new IllegalStateException("Cant use specification with empty predicates - use default find all then");
+            return null;
 
         //If both are not empty
         if (!OrPredicates.isEmpty() && !AndPredicates.isEmpty())

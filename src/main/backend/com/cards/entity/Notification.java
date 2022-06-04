@@ -28,6 +28,8 @@ public class Notification {
     )
     private UUID notificationId;
 
+    private UUID cardId;
+
     private LocalDateTime notificationTime;
 
     private String message;

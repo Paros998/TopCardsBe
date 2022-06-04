@@ -154,6 +154,16 @@ public enum SearchOperation {
         }
     },
 
+    IS_MEMBER {
+        @Override
+        public <T> Predicate getPredicate(Root<T> root, SearchCriteria criteria, CriteriaBuilder builder) {
+            return builder.isMember(
+                    criteria.getValue(),
+                    root.get(criteria.getKey())
+            );
+        }
+    },
+
     IN {
         @Override
         public <T> Predicate getPredicate(Root<T> root, SearchCriteria criteria, CriteriaBuilder builder) {
@@ -239,6 +249,20 @@ public enum SearchOperation {
             return builder.notEqual(root.get(
                     criteria.getKey()), LocalDateTime.parse(criteria.getValue().toString())
             );
+        }
+    },
+
+    IS_EMPTY {
+        @Override
+        public <T> Predicate getPredicate(Root<T> root, SearchCriteria criteria, CriteriaBuilder builder) {
+            return builder.isEmpty(root.get(criteria.getKey()));
+        }
+    },
+
+    IS_NOT_EMPTY {
+        @Override
+        public <T> Predicate getPredicate(Root<T> root, SearchCriteria criteria, CriteriaBuilder builder) {
+            return builder.isNotEmpty(root.get(criteria.getKey()));
         }
     };
 

@@ -25,9 +25,10 @@ public class FileService implements IFileService {
     private final AmazonS3 s3client;
     private final AmazonConfig amazonConfig;
     private final FileRepository fileRepository;
+    private final static Integer OneMB = 1_050_000;
 
     private String NOT_FOUND(UUID fileId) {
-        return "File with id" + fileId + " doesn't exists in database";
+        return "File with id " + fileId + " doesn't exists in database";
     }
 
     private String TO_BIG() {
@@ -36,7 +37,7 @@ public class FileService implements IFileService {
 
     public UUID uploadFile(MultipartFile file) {
 
-        if (file.getSize() > 2000000) {
+        if (file.getSize() > OneMB) {
             throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, TO_BIG());
         }
 
@@ -71,15 +72,14 @@ public class FileService implements IFileService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND(fileId))
         );
 
-        //TODO update urls later
-        return "https://bike-be-files.s3.eu-central-1.amazonaws.com/" + file.getFileName();
+        return "https://top-cards-bucket.s3.eu-central-1.amazonaws.com/" + file.getFileName();
 
     }
 
     public List<String> getFilesUrls(List<File> files) {
         return files
                 .stream()
-                .map(file -> "https://bike-be-files.s3.eu-central-1.amazonaws.com/" + file.getFileName())
+                .map(file -> "https://top-cards-bucket.s3.eu-central-1.amazonaws.com/" + file.getFileName())
                 .collect(Collectors.toList());
 
     }
